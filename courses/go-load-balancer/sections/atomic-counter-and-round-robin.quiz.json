@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "Why is `s.current++` a data race when called from multiple goroutines?",
+    "options": [
+      "Because `uint64` overflow causes undefined behavior",
+      "Because `++` compiles to a non-atomic read-modify-write sequence that goroutines can interleave",
+      "Because Go does not allow modifying struct fields from goroutines",
+      "Because `current` is private (lowercase) and goroutines cannot access private fields"
+    ],
+    "correctIndex": 1,
+    "explanation": "`s.current++` is equivalent to `s.current = s.current + 1`, which is a load, an add, and a store. Two goroutines can both read the same value, both add 1, and both write back the same result — losing one increment. Atomic operations prevent this by making the entire read-modify-write indivisible."
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "What does `atomic.AddUint64(&s.current, 1)` return?",
+    "options": [
+      "The old value of `s.current` before the addition",
+      "The new value of `s.current` after the addition",
+      "A boolean indicating whether the addition succeeded",
+      "Nothing — it modifies `s.current` in place and returns nothing"
+    ],
+    "correctIndex": 1,
+    "explanation": "`atomic.AddUint64` atomically adds the delta and returns the **new** value. This is important for `NextIndex` — we use the returned new value to compute the modulo index."
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "In `GetNextPeer`, why does the loop run from `next` to `len(backends) + next` instead of just `0` to `len(backends)`?",
+    "options": [
+      "To ensure the counter keeps increasing monotonically",
+      "To start from the next backend in the cycle and traverse a full rotation from that point",
+      "To avoid checking the last backend in the slice",
+      "Because negative indices are not allowed in Go"
+    ],
+    "correctIndex": 1,
+    "explanation": "We want to start checking from `next` (the next backend in rotation) and try each subsequent backend in order. Using `i` from `next` to `next + len`, then `i % len` for the actual index, gives us a full cycle starting at `next` without repeating any backend."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "What does `go run -race main.go` do?",
+    "options": [
+      "Runs the program faster using multiple CPU cores",
+      "Enables the data race detector, which reports concurrent memory accesses at runtime",
+      "Compiles the program with optimizations disabled for debugging",
+      "Runs tests in parallel"
+    ],
+    "correctIndex": 1,
+    "explanation": "The `-race` flag enables Go's built-in race detector. It instruments the binary to track every memory access and reports when two goroutines access the same memory concurrently without synchronization. It has a small runtime overhead but is invaluable for finding concurrency bugs."
+  },
+  {
+    "id": "q5",
+    "type": "multiple-choice",
+    "question": "After `GetNextPeer` finds a non-original alive backend at index `idx`, it calls `atomic.StoreUint64(&s.current, uint64(idx))`. Why?",
+    "options": [
+      "To reset the counter to zero",
+      "So the next call to `NextIndex` continues from `idx` rather than from wherever the counter drifted",
+      "Because `idx` is the total number of requests processed",
+      "To ensure the backend at `idx` is selected again on the next call"
+    ],
+    "correctIndex": 1,
+    "explanation": "If we skipped dead backends (e.g., went from index 1 to index 3), the `current` counter still holds the value corresponding to index 1. Storing `idx` as the new current means the next `NextIndex` call starts from `idx+1`, maintaining proper round-robin progression."
+  }
+]

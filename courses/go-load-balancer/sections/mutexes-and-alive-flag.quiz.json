@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "What is the key difference between `sync.Mutex` and `sync.RWMutex`?",
+    "options": [
+      "`sync.RWMutex` is faster in all cases; `sync.Mutex` is only for compatibility",
+      "`sync.RWMutex` allows multiple concurrent readers but only one writer at a time; `sync.Mutex` is exclusive for all",
+      "`sync.RWMutex` is for reading from files; `sync.Mutex` is for writing to files",
+      "`sync.Mutex` blocks all goroutines; `sync.RWMutex` only blocks the calling goroutine"
+    ],
+    "correctIndex": 1,
+    "explanation": "`sync.RWMutex` distinguishes between read and write locks. Multiple goroutines can hold `RLock()` simultaneously (as long as no writer holds `Lock()`). A write lock (`Lock()`) is exclusive — no readers or other writers can proceed. This is ideal when reads heavily outnumber writes."
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "Why should `IsAlive()` use `RLock()`/`RUnlock()` rather than `Lock()`/`Unlock()`?",
+    "options": [
+      "Because `RLock` is mandatory for read operations — `Lock` would panic",
+      "Because `IsAlive` is called frequently by many goroutines, and `RLock` allows them to run concurrently without blocking each other",
+      "Because `RLock` is faster in all cases",
+      "Because `Lock` would deadlock if called from within a goroutine"
+    ],
+    "correctIndex": 1,
+    "explanation": "Every incoming request calls `IsAlive()` to find a healthy backend. If `IsAlive` used an exclusive `Lock`, all requests would serialize — only one at a time could check liveness. `RLock` lets thousands of concurrent readers proceed simultaneously, only blocking when a writer (`SetAlive`) holds the write lock."
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "Why is `defer mu.Unlock()` preferred over calling `mu.Unlock()` explicitly at the end of a function?",
+    "options": [
+      "Because `defer` is required to use mutexes in Go",
+      "Because `defer` ensures `Unlock` runs even if the function returns early via an error or panic",
+      "Because calling `Unlock` directly is a data race",
+      "Because `defer` is faster than a direct function call"
+    ],
+    "correctIndex": 1,
+    "explanation": "`defer` registers a call to be made when the surrounding function returns — regardless of how it returns (normal return, early return, or panic). Without `defer`, an early `return` could skip the `Unlock`, leaving the mutex permanently locked and causing a deadlock."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "The `mux` field in `Backend` is declared as `sync.RWMutex` (not `*sync.RWMutex`). Why is embedding it as a value (not a pointer) correct?",
+    "options": [
+      "Because `sync.RWMutex` does not support pointer semantics",
+      "Because the mutex must live inside the Backend struct to be initialized automatically to its zero value (unlocked state)",
+      "Because passing a pointer to a mutex would cause a copy of the mutex on every method call",
+      "Because Go doesn't allow pointer fields in structs that are themselves pointed to"
+    ],
+    "correctIndex": 1,
+    "explanation": "The zero value of `sync.RWMutex` is an unlocked, ready-to-use mutex. Embedding it as a value means it's automatically initialized when the `Backend` struct is created — no `sync.NewRWMutex()` call needed. Storing it as a pointer would require explicit initialization and add an unnecessary heap allocation."
+  },
+  {
+    "id": "q5",
+    "type": "multiple-choice",
+    "question": "If a goroutine holds an `RLock` on a `sync.RWMutex`, what happens when another goroutine calls `Lock()`?",
+    "options": [
+      "The `Lock()` call panics immediately",
+      "The `Lock()` call blocks until all current `RLock` holders call `RUnlock()`",
+      "The `Lock()` succeeds immediately — `Lock` and `RLock` are compatible",
+      "All new `RLock()` calls succeed but `Lock()` queues behind them indefinitely"
+    ],
+    "correctIndex": 1,
+    "explanation": "When a write lock (`Lock`) is requested, it blocks until all current read locks are released. Additionally, once `Lock()` is waiting, new `RLock()` calls are also blocked (to prevent writer starvation). The write lock ensures exclusive access — no readers or other writers can proceed while it's held."
+  }
+]

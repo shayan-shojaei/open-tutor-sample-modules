@@ -1,0 +1,16 @@
+[
+  {
+    "id": "p1",
+    "statement": "Extend the `Backend` struct to include a third field: `ActiveConnections int`. Then write a pointer-receiver method `IncrementConnections()` that adds 1 to `ActiveConnections`, and a value-receiver method `ConnectionCount() int` that returns the current count.\n\nWrite a `main()` that creates a backend, calls `IncrementConnections()` three times, and prints the connection count.",
+    "hint": "Remember: to modify a field you need a pointer receiver `(b *Backend)`. To just read a field, a value receiver `(b Backend)` is fine.",
+    "solution": "```go\npackage main\n\nimport \"fmt\"\n\ntype Backend struct {\n    URL               string\n    Alive             bool\n    ActiveConnections int\n}\n\nfunc (b *Backend) IncrementConnections() {\n    b.ActiveConnections++\n}\n\nfunc (b Backend) ConnectionCount() int {\n    return b.ActiveConnections\n}\n\nfunc main() {\n    b := Backend{URL: \"http://localhost:8080\", Alive: true}\n    b.IncrementConnections()\n    b.IncrementConnections()\n    b.IncrementConnections()\n    fmt.Println(b.ConnectionCount()) // 3\n}\n```",
+    "answer": "3"
+  },
+  {
+    "id": "p2",
+    "statement": "Given the `Backend` struct below, explain why calling `b.SetAlive(false)` does NOT change `b.Alive` to `false`, then fix it:\n\n```go\ntype Backend struct {\n    URL   string\n    Alive bool\n}\n\nfunc (b Backend) SetAlive(alive bool) {\n    b.Alive = alive\n}\n\nfunc main() {\n    b := Backend{URL: \"http://localhost:9090\", Alive: true}\n    b.SetAlive(false)\n    fmt.Println(b.Alive) // prints: true  — why?\n}\n```",
+    "hint": "What kind of receiver does `SetAlive` use? What does that mean for the variable `b` inside the method?",
+    "solution": "`SetAlive` has a **value receiver** `(b Backend)`. Go passes a copy of the struct into the method, so `b.Alive = alive` modifies only the local copy, not the original. After the method returns, the copy is discarded.\n\nFix: change the receiver to a pointer receiver:\n\n```go\nfunc (b *Backend) SetAlive(alive bool) {\n    b.Alive = alive\n}\n```\n\nNow `b` is a pointer to the original struct, so the assignment persists.",
+    "answer": "Change `(b Backend)` to `(b *Backend)`"
+  }
+]

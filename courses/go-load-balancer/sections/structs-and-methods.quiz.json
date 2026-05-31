@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "You have a method `func (b Backend) Reset()` that sets `b.Alive = false`. After calling `myBackend.Reset()`, what is the value of `myBackend.Alive`?",
+    "options": [
+      "false — the method modified it",
+      "true — the method received a copy and the original is unchanged",
+      "It depends on whether `Alive` was true before",
+      "This code won't compile"
+    ],
+    "correctIndex": 1,
+    "explanation": "A value receiver passes a copy of the struct. Changes inside the method affect only the copy, so `myBackend.Alive` remains unchanged. To modify the original, you need a pointer receiver `(b *Backend)`."
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "Which of the following correctly defines a pointer receiver method `MarkAlive` on `Backend`?",
+    "options": [
+      "`func (b Backend) MarkAlive() { b.Alive = true }`",
+      "`func (b *Backend) MarkAlive() { b.Alive = true }`",
+      "`func Backend.MarkAlive(b *Backend) { b.Alive = true }`",
+      "`func MarkAlive(Backend *b) { b.Alive = true }`"
+    ],
+    "correctIndex": 1,
+    "explanation": "The pointer receiver syntax is `(b *Backend)` placed between `func` and the method name. Option A is a value receiver. Options C and D are not valid Go syntax."
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "What is the zero value of the `Alive bool` field in a newly created `Backend{}` (with no fields set)?",
+    "options": [
+      "true",
+      "false",
+      "nil",
+      "It causes a compile error — you must initialize all fields"
+    ],
+    "correctIndex": 1,
+    "explanation": "Go initializes every field to its zero value. The zero value for `bool` is `false`. You never need to initialize fields explicitly unless you want a non-zero value."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "If `Backend` has a `String() string` method, what happens when you pass a `Backend` value to `fmt.Println`?",
+    "options": [
+      "Go prints the raw struct fields like `{http://localhost true}`",
+      "Go automatically calls `String()` and prints its return value",
+      "Go panics because `fmt.Println` doesn't know about custom types",
+      "You must call `fmt.Println(b.String())` explicitly"
+    ],
+    "correctIndex": 1,
+    "explanation": "`fmt.Println` checks if the value implements the `fmt.Stringer` interface (i.e., has a `String() string` method). If it does, it calls that method automatically. This is one of Go's most commonly used interfaces."
+  },
+  {
+    "id": "q5",
+    "type": "multiple-choice",
+    "question": "When should you prefer a pointer receiver over a value receiver?",
+    "options": [
+      "Always — pointer receivers are always faster",
+      "When the method needs to modify the struct, or when the struct is large",
+      "Only when the struct contains pointers itself",
+      "When the method is called more than once"
+    ],
+    "correctIndex": 1,
+    "explanation": "Use a pointer receiver when (1) the method needs to mutate the struct, or (2) the struct is large and copying it on every call would be wasteful. For small read-only methods a value receiver is fine, but consistency within a type matters — if any method uses a pointer receiver, prefer pointer receivers throughout."
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "p1",
+    "statement": "Write a function `probeAll(pool *ServerPool)` that runs `isBackendAlive` on every backend in the pool and prints a summary line for each one in the format:\n```\nhttp://localhost:8081 → UP\nhttp://localhost:8082 → DOWN\n```\n\nThen write a `main()` that creates a pool with backends on ports 8081 and 8082 (even if they're not running — DOWN is a valid result), and calls `probeAll`.",
+    "hint": "Iterate `pool.backends` with `range`. Use `b.URL.String()` for the full URL string. Call `isBackendAlive(b.URL)` and branch on the result.",
+    "solution": "```go\nfunc probeAll(pool *ServerPool) {\n    for _, b := range pool.backends {\n        alive := isBackendAlive(b.URL)\n        status := \"UP\"\n        if !alive {\n            status = \"DOWN\"\n        }\n        fmt.Printf(\"%s → %s\\n\", b.URL.String(), status)\n    }\n}\n\nfunc main() {\n    pool := &ServerPool{}\n    for _, u := range []string{\"http://localhost:8081\", \"http://localhost:8082\"} {\n        b, _ := NewBackend(u)\n        pool.AddBackend(b)\n    }\n    probeAll(pool)\n}\n```",
+    "answer": "Each backend printed with UP or DOWN depending on whether the TCP connection succeeds"
+  },
+  {
+    "id": "p2",
+    "statement": "The code below has a resource leak. Identify it, explain why it matters, and fix it:\n\n```go\nfunc isBackendAlive(u *url.URL) bool {\n    conn, err := net.DialTimeout(\"tcp\", u.Host, 2*time.Second)\n    if err != nil {\n        return false\n    }\n    return true\n}\n```",
+    "hint": "What happens to `conn` when the function returns `true`?",
+    "solution": "When `isBackendAlive` returns `true`, `conn` is never closed. The TCP connection stays open, consuming a file descriptor on both the client and server side. If `HealthCheck` runs every 20 seconds and the process has, say, 100 backends, that's 100 leaked connections per cycle — thousands over time. Eventually the OS refuses to open new file descriptors.\n\nFix:\n\n```go\nfunc isBackendAlive(u *url.URL) bool {\n    conn, err := net.DialTimeout(\"tcp\", u.Host, 2*time.Second)\n    if err != nil {\n        return false\n    }\n    defer conn.Close()\n    return true\n}\n```\n\n`defer conn.Close()` is placed immediately after the nil check so it always runs, regardless of how the function returns.",
+    "answer": "`conn` is never closed when the function returns `true`; add `defer conn.Close()` after the nil check"
+  }
+]

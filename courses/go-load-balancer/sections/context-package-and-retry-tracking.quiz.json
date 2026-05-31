@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "What does `context.WithValue(ctx, key, val)` return?",
+    "options": [
+      "A modified version of `ctx` with the key-value pair added in place",
+      "A new context that wraps `ctx` and returns `val` when queried for `key`",
+      "A map containing all key-value pairs including `key: val`",
+      "Nothing — it modifies `ctx` directly"
+    ],
+    "correctIndex": 1,
+    "explanation": "Context is immutable. `context.WithValue` returns a brand-new context that wraps the original. The original `ctx` is unchanged. This is why you must always use the returned value: `ctx = context.WithValue(ctx, key, val)`."
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "What is the purpose of the `ok` in `val, ok := ctx.Value(key).(int)`?",
+    "options": [
+      "It checks whether the key exists in the context",
+      "It performs a safe type assertion — `ok` is false if the value is not an `int` (or if the key doesn't exist)",
+      "It locks the context for concurrent access",
+      "It returns the default int value if the key is not found"
+    ],
+    "correctIndex": 1,
+    "explanation": "`ctx.Value(key)` returns `interface{}`. The `.(int)` type assertion extracts the int value. The two-value form `val, ok` is the safe version: if the assertion fails (wrong type or missing key), `val` is `0` and `ok` is `false`. Without `ok`, a failed assertion panics."
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "Why does the load balancer use `type contextKey int` with `iota` rather than plain string keys like `\"attempts\"`?",
+    "options": [
+      "Because `context.WithValue` does not accept string keys",
+      "To prevent key collisions across packages, since context key lookup uses both value and type equality",
+      "Because strings are slower to compare than integers",
+      "Because `iota` automatically increments to avoid duplicate values"
+    ],
+    "correctIndex": 1,
+    "explanation": "Context key lookup uses `==` on both the value and the type. By using a private named type (`contextKey`), your keys are distinct from any other package's keys — even if they use the same underlying integer. String keys can collide if two packages happen to use the same string."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "After calling `r2 := r.WithContext(ctx2)`, what is true about `r` and `r2`?",
+    "options": [
+      "`r` and `r2` are the same pointer — `r.Context()` now returns `ctx2`",
+      "`r2` is a shallow copy of `r` with a different context; `r` is unchanged",
+      "`r` is garbage collected immediately since `r2` replaces it",
+      "`r2` contains a deep copy of `r` including a copy of the request body"
+    ],
+    "correctIndex": 1,
+    "explanation": "`r.WithContext` returns a new `*http.Request` (a shallow copy) with the context replaced. The original `r` is unchanged. This immutability is important for the retry pattern: each retry can add data to the context without affecting other concurrent requests using the original `r`."
+  },
+  {
+    "id": "q5",
+    "type": "multiple-choice",
+    "question": "In the load balancer, why is `GetAttemptsFromContext` returning `0` as the default correct behavior?",
+    "options": [
+      "Because the first request has never been attempted, which is represented by 0",
+      "Because 0 means the request should be rejected immediately",
+      "Because it signals to `lb` that the context is uninitialized and should be skipped",
+      "Because context values default to 0 for all numeric types"
+    ],
+    "correctIndex": 0,
+    "explanation": "A fresh incoming request has no `Attempts` key in its context yet — it hasn't been retried. Returning `0` correctly represents 'no previous attempts.' The `lb` function checks `attempts > 3`, so 0 allows the request to proceed normally on the first try."
+  }
+]

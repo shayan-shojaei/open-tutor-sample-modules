@@ -1,0 +1,16 @@
+[
+  {
+    "id": "p1",
+    "statement": "Write a small HTTP server that responds differently based on the request path:\n- `GET /` → respond with `\"Load balancer running\"` and status 200\n- Any other path → respond with `\"Not found\"` and status 404\n\nUse a single handler function `router` and pass it to `http.Server` using `http.HandlerFunc`.",
+    "hint": "Use `r.URL.Path` to check the request path. Use `w.WriteHeader(statusCode)` to set the status, then `w.Write([]byte(...))` for the body. Or use `http.Error(w, msg, code)` for error responses.",
+    "solution": "```go\npackage main\n\nimport (\n    \"fmt\"\n    \"log\"\n    \"net/http\"\n)\n\nfunc router(w http.ResponseWriter, r *http.Request) {\n    if r.URL.Path == \"/\" {\n        fmt.Fprint(w, \"Load balancer running\")\n        return\n    }\n    http.Error(w, \"Not found\", http.StatusNotFound)\n}\n\nfunc main() {\n    server := http.Server{\n        Addr:    \":8000\",\n        Handler: http.HandlerFunc(router),\n    }\n    log.Println(\"Server started on :8000\")\n    log.Fatal(server.ListenAndServe())\n}\n```",
+    "answer": "`/` returns 200 \"Load balancer running\"; other paths return 404 \"Not found\""
+  },
+  {
+    "id": "p2",
+    "statement": "Assign a function to a variable and pass it as an HTTP handler without using `http.HandleFunc`. Specifically:\n1. Define a function `healthHandler(w http.ResponseWriter, r *http.Request)` that writes `\"OK\"` with status 200\n2. Assign it to a variable `h` of type `http.HandlerFunc`\n3. Start a server on `:8001` using `h` as the handler\n\nThis demonstrates that `http.HandlerFunc` is both a type conversion and a value.",
+    "hint": "`http.HandlerFunc` is a type defined as `type HandlerFunc func(ResponseWriter, *Request)`. Assigning `h := http.HandlerFunc(healthHandler)` converts the function to that type.",
+    "solution": "```go\npackage main\n\nimport (\n    \"log\"\n    \"net/http\"\n)\n\nfunc healthHandler(w http.ResponseWriter, r *http.Request) {\n    w.WriteHeader(http.StatusOK)\n    w.Write([]byte(\"OK\"))\n}\n\nfunc main() {\n    h := http.HandlerFunc(healthHandler)\n    server := http.Server{\n        Addr:    \":8001\",\n        Handler: h,\n    }\n    log.Fatal(server.ListenAndServe())\n}\n```",
+    "answer": "Server on :8001 responds to all requests with `OK`"
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "name": "Open Tutor Sample Modules",
+  "description": "Sample courses included with Open Tutor — Calculus 3 and Building a Load Balancer in Go.",
+  "modules": [
+    {
+      "type": "course",
+      "id": "calc3",
+      "title": "Calculus 3",
+      "description": "Multivariable calculus covering vectors, partial derivatives, multiple integrals, and vector calculus."
+    },
+    {
+      "type": "course",
+      "id": "go-load-balancer",
+      "title": "Building a Load Balancer in Go",
+      "description": "Build a production-grade round-robin HTTP load balancer from scratch, learning Go's core systems primitives through a single evolving project."
+    }
+  ]
+}

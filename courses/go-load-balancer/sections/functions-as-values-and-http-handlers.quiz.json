@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "What does `http.HandlerFunc(lb)` do?",
+    "options": [
+      "Calls the `lb` function immediately with empty request/response arguments",
+      "Converts the `lb` function to a type that implements the `http.Handler` interface",
+      "Registers `lb` in the default mux at the root path `/`",
+      "Wraps `lb` in middleware that adds logging"
+    ],
+    "correctIndex": 1,
+    "explanation": "`http.HandlerFunc` is a named function type. `http.HandlerFunc(lb)` is a type conversion — it converts the `lb` function value into the `http.HandlerFunc` type, which has a `ServeHTTP` method defined on it. This makes it implement `http.Handler`."
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "What is the signature of a valid HTTP handler function in Go?",
+    "options": [
+      "`func(request *http.Request) http.Response`",
+      "`func(w http.ResponseWriter, r *http.Request)`",
+      "`func(ctx context.Context, w http.ResponseWriter, r http.Request)`",
+      "`func(w *http.ResponseWriter, r *http.Request)`"
+    ],
+    "correctIndex": 1,
+    "explanation": "The correct signature is `func(http.ResponseWriter, *http.Request)`. `http.ResponseWriter` is an interface (not a pointer), and `*http.Request` is a pointer to the request struct. This matches the `http.HandlerFunc` type definition."
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "Why does the load balancer use `http.Server{...}` instead of just calling `http.ListenAndServe(\":8000\", handler)`?",
+    "options": [
+      "`http.ListenAndServe` doesn't accept a custom handler",
+      "`http.Server` allows configuring timeouts, TLS, and other server-level settings beyond the defaults",
+      "`http.ListenAndServe` is deprecated",
+      "There is no functional difference — both approaches are identical"
+    ],
+    "correctIndex": 1,
+    "explanation": "`http.ListenAndServe` is a convenience wrapper with zero configuration. `http.Server` lets you set `ReadTimeout`, `WriteTimeout`, `IdleTimeout`, TLS config, and other production-grade settings. For a real load balancer, these are essential."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "What does `log.Fatal(server.ListenAndServe())` do?",
+    "options": [
+      "Starts the server and exits after the first request",
+      "Starts the server; if `ListenAndServe` returns an error, logs it and calls `os.Exit(1)`",
+      "Panics if the server can't start",
+      "Starts the server in a goroutine and logs a startup message"
+    ],
+    "correctIndex": 1,
+    "explanation": "`ListenAndServe` blocks indefinitely while the server is running. It only returns if an error occurs (e.g., port in use). `log.Fatal` logs the error and calls `os.Exit(1)`. This pattern ensures the process exits loudly on startup failure rather than silently doing nothing."
+  },
+  {
+    "id": "q5",
+    "type": "multiple-choice",
+    "question": "In Go, which of the following is true about functions?",
+    "options": [
+      "Functions can only be passed as arguments if they are defined at the package level",
+      "Functions are first-class values — they can be assigned to variables and passed as arguments",
+      "Anonymous functions (lambdas) are not supported",
+      "You cannot store a function in a struct field"
+    ],
+    "correctIndex": 1,
+    "explanation": "Go treats functions as first-class values. You can assign them to variables, pass them as function arguments, return them from functions, and store them in struct fields or slices. This is fundamental to Go's approach to callbacks, middleware, and the `http.HandlerFunc` pattern."
+  }
+]

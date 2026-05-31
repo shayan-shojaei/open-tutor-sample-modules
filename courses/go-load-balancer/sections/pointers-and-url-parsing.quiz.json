@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "What does the `&` operator do in Go?",
+    "options": [
+      "Dereferences a pointer to get the underlying value",
+      "Returns the memory address of a variable (creates a pointer)",
+      "Declares a new pointer variable",
+      "Performs bitwise AND on two integers"
+    ],
+    "correctIndex": 1,
+    "explanation": "`&x` takes the address of `x`, producing a pointer to `x`. The `*` operator does the opposite — it dereferences a pointer to get the value it points to."
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "What is the zero value of a pointer type like `*Backend`?",
+    "options": [
+      "An empty `Backend{}` struct",
+      "0",
+      "nil",
+      "It has no zero value — you must initialize it"
+    ],
+    "correctIndex": 2,
+    "explanation": "The zero value of any pointer type in Go is `nil`. Dereferencing a nil pointer causes a runtime panic, so always check for nil before using a pointer you didn't initialize yourself."
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "Why does `url.Parse` return `*url.URL` (a pointer) rather than `url.URL` (a value)?",
+    "options": [
+      "Because Go doesn't allow returning structs from functions",
+      "To allow the caller to check if the result is nil",
+      "Because `url.URL` is a large struct and passing it by value would allocate it on the stack",
+      "The standard library convention is to return pointers so callers can share and mutate the parsed URL without copying"
+    ],
+    "correctIndex": 3,
+    "explanation": "Returning a pointer allows callers to pass the parsed URL around without copying the struct, and multiple parts of the program can reference the same `url.URL`. It also signals heap allocation — the struct lives beyond the function call."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "Given `b, err := NewBackend(\"http://localhost:8080\")`, which field holds the hostname `localhost:8080`?",
+    "options": [
+      "`b.URL`",
+      "`b.URL.Host`",
+      "`b.URL.Path`",
+      "`b.Host`"
+    ],
+    "correctIndex": 1,
+    "explanation": "`url.URL` has separate fields: `Scheme` (e.g. `http`), `Host` (e.g. `localhost:8080`), `Path`, etc. `b.URL` is the pointer to the whole struct, not a string."
+  },
+  {
+    "id": "q5",
+    "type": "multiple-choice",
+    "question": "What is the idiomatic Go return pattern when a constructor function fails?",
+    "options": [
+      "`return Backend{}, err`",
+      "`return nil, err`",
+      "`panic(err)`",
+      "`return &Backend{}, err`"
+    ],
+    "correctIndex": 1,
+    "explanation": "When returning a pointer and an error, return `nil` for the pointer on failure. Returning `&Backend{}` would give the caller a non-nil pointer that points to an unusable zero-value struct, which is confusing. `nil, err` is the clear signal that there's no valid result."
+  }
+]

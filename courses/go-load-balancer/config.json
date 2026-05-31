@@ -1,0 +1,94 @@
+{
+  "id": "go-load-balancer",
+  "title": "Building a Load Balancer in Go",
+  "description": "Build a production-grade round-robin HTTP load balancer from scratch, learning Go's core systems primitives — structs, concurrency, goroutines, and HTTP — through a single evolving project.",
+  "subject": "programming",
+  "icon": "⚖️",
+  "language": "en",
+  "chapters": [
+    {
+      "id": "modeling-the-domain",
+      "title": "Modeling the Domain",
+      "sections": [
+        {
+          "id": "structs-and-methods",
+          "title": "Structs and Methods",
+          "chapterId": "modeling-the-domain"
+        },
+        {
+          "id": "pointers-and-url-parsing",
+          "title": "Pointers and URL Parsing",
+          "chapterId": "modeling-the-domain"
+        },
+        {
+          "id": "slices-and-server-pool",
+          "title": "Slices and the ServerPool",
+          "chapterId": "modeling-the-domain"
+        }
+      ]
+    },
+    {
+      "id": "first-working-lb",
+      "title": "The First Working Load Balancer",
+      "sections": [
+        {
+          "id": "functions-as-values-and-http-handlers",
+          "title": "Functions as Values and HTTP Handlers",
+          "chapterId": "first-working-lb"
+        },
+        {
+          "id": "reverse-proxy-and-httputil",
+          "title": "Reverse Proxy with httputil",
+          "chapterId": "first-working-lb"
+        },
+        {
+          "id": "atomic-counter-and-round-robin",
+          "title": "Atomic Counter and Round-Robin",
+          "chapterId": "first-working-lb"
+        }
+      ]
+    },
+    {
+      "id": "concurrency-and-safety",
+      "title": "Correctness Under Concurrency",
+      "sections": [
+        {
+          "id": "mutexes-and-alive-flag",
+          "title": "Mutexes and the Alive Flag",
+          "chapterId": "concurrency-and-safety"
+        },
+        {
+          "id": "context-package-and-retry-tracking",
+          "title": "The Context Package and Retry Tracking",
+          "chapterId": "concurrency-and-safety"
+        },
+        {
+          "id": "closures-and-error-handlers",
+          "title": "Closures and Proxy Error Handlers",
+          "chapterId": "concurrency-and-safety"
+        }
+      ]
+    },
+    {
+      "id": "health-checks-and-finish",
+      "title": "Health Checks and the Finished Load Balancer",
+      "sections": [
+        {
+          "id": "tcp-dialing-and-backend-health",
+          "title": "TCP Dialing and Backend Health",
+          "chapterId": "health-checks-and-finish"
+        },
+        {
+          "id": "goroutines-and-tickers",
+          "title": "Goroutines and Tickers",
+          "chapterId": "health-checks-and-finish"
+        },
+        {
+          "id": "flags-and-wiring-main",
+          "title": "Flag Parsing and Wiring main()",
+          "chapterId": "health-checks-and-finish"
+        }
+      ]
+    }
+  ]
+}

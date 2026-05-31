@@ -1,0 +1,16 @@
+[
+  {
+    "id": "p1",
+    "statement": "The code below has a data race. Run it mentally (or with `-race`) to identify the problem, then fix it by adding a `sync.RWMutex` to `Counter` and protecting the `Inc` and `Value` methods appropriately.\n\n```go\ntype Counter struct {\n    n int\n}\n\nfunc (c *Counter) Inc() {\n    c.n++\n}\n\nfunc (c *Counter) Value() int {\n    return c.n\n}\n\nfunc main() {\n    c := &Counter{}\n    var wg sync.WaitGroup\n    for i := 0; i < 1000; i++ {\n        wg.Add(1)\n        go func() {\n            defer wg.Done()\n            c.Inc()\n        }()\n    }\n    wg.Wait()\n    fmt.Println(c.Value())\n}\n```",
+    "hint": "Should `Inc` use `Lock`/`Unlock` or `RLock`/`RUnlock`? Should `Value` use `Lock`/`Unlock` or `RLock`/`RUnlock`?",
+    "solution": "```go\ntype Counter struct {\n    mu sync.RWMutex\n    n  int\n}\n\nfunc (c *Counter) Inc() {\n    c.mu.Lock()\n    defer c.mu.Unlock()\n    c.n++\n}\n\nfunc (c *Counter) Value() int {\n    c.mu.RLock()\n    defer c.mu.RUnlock()\n    return c.n\n}\n```\n\n`Inc` writes `c.n`, so it needs the exclusive write lock (`Lock`). `Value` only reads, so it uses the shared read lock (`RLock`). With 1000 goroutines incrementing, the final value will consistently be 1000.",
+    "answer": "Use `Lock()`/`Unlock()` in `Inc` and `RLock()`/`RUnlock()` in `Value`"
+  },
+  {
+    "id": "p2",
+    "statement": "Update `GetNextPeer` in `ServerPool` to use `b.IsAlive()` (the mutex-protected method) instead of accessing `b.Alive` directly. Show the full updated `GetNextPeer` implementation.",
+    "hint": "Replace `if s.backends[idx].Alive {` with `if s.backends[idx].IsAlive() {`.",
+    "solution": "```go\nfunc (s *ServerPool) GetNextPeer() *Backend {\n    next := s.NextIndex()\n    l := len(s.backends) + next\n    for i := next; i < l; i++ {\n        idx := i % len(s.backends)\n        if s.backends[idx].IsAlive() {\n            if i != next {\n                atomic.StoreUint64(&s.current, uint64(idx))\n            }\n            return s.backends[idx]\n        }\n    }\n    return nil\n}\n```\n\nNow every read of the `Alive` field goes through the `RWMutex`, and `SetAlive` (called by health checks) uses the write lock. There are no more data races around backend liveness.",
+    "answer": "Replace direct `b.Alive` access with `b.IsAlive()`"
+  }
+]

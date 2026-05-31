@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "What are the three components of a slice's internal representation?",
+    "options": [
+      "Type, length, and capacity",
+      "Pointer to underlying array, length, and capacity",
+      "Pointer to underlying array, length, and element size",
+      "Starting index, ending index, and element type"
+    ],
+    "correctIndex": 1,
+    "explanation": "A slice is internally a struct with three fields: a pointer to the first element of the underlying array, the length (number of elements currently in the slice), and the capacity (how many elements fit before a new array must be allocated)."
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "What is the correct way to add a new element to a slice `s`?",
+    "options": [
+      "`s.add(element)`",
+      "`s[len(s)] = element`",
+      "`s = append(s, element)`",
+      "`append(s, element)` — no reassignment needed"
+    ],
+    "correctIndex": 2,
+    "explanation": "`append` may allocate a new underlying array and returns a new slice header. You must reassign the result (`s = append(s, element)`) or the growth is lost. Forgetting to reassign is a common Go bug."
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "In `for i, b := range pool.backends`, what is `b`?",
+    "options": [
+      "A pointer to the backend at index `i` in the slice",
+      "A copy of the `*Backend` pointer at index `i`",
+      "A copy of the `Backend` struct at index `i`",
+      "The index of the backend"
+    ],
+    "correctIndex": 1,
+    "explanation": "`range` over a `[]*Backend` slice gives you copies of the pointer values. Since the elements are already pointers, `b` is a copy of the pointer — it still points to the same backend struct on the heap, so `b.Alive = false` would modify the original."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "Why does `ServerPool` store `[]*Backend` (slice of pointers) rather than `[]Backend` (slice of values)?",
+    "options": [
+      "Because slices of structs are not allowed in Go",
+      "So multiple parts of the program can reference and mutate the same backend without copying",
+      "Because `Backend` contains a `*url.URL` field which makes it non-copyable",
+      "For performance — pointer slices are always faster"
+    ],
+    "correctIndex": 1,
+    "explanation": "Storing pointers means every part of the program that holds a `*Backend` reference sees the same backend state. When a health check goroutine sets `b.Alive = false`, the load balancer's routing loop sees the update immediately. With value copies, each part would have its own stale snapshot."
+  },
+  {
+    "id": "q5",
+    "type": "multiple-choice",
+    "question": "You declare `var pool ServerPool`. When you call `pool.AddBackend(b)` where `AddBackend` has a pointer receiver, does this compile?",
+    "options": [
+      "No — you must declare `pool` as `pool := &ServerPool{}`",
+      "Yes — Go automatically takes the address of `pool` since it is addressable",
+      "No — value types cannot have pointer receiver methods called on them",
+      "Yes — Go copies `pool` into a temporary pointer"
+    ],
+    "correctIndex": 1,
+    "explanation": "Go automatically takes the address of an addressable variable when calling a pointer-receiver method. `var pool ServerPool` is addressable (it's a local variable), so `pool.AddBackend(b)` compiles as `(&pool).AddBackend(b)`. If `pool` were not addressable (e.g., a map value), it would not compile."
+  }
+]

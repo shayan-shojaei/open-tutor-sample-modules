@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "What does the `go` keyword do?",
+    "options": [
+      "Runs a function synchronously on a new OS thread",
+      "Starts a goroutine — the function runs concurrently and the calling code continues immediately",
+      "Schedules a function to run after the current function returns",
+      "Runs a function and blocks until it completes"
+    ],
+    "correctIndex": 1,
+    "explanation": "`go f()` starts `f` as a new goroutine and returns immediately — the calling code and `f` run concurrently. The runtime schedules goroutines onto OS threads, but goroutines are much cheaper to create than threads."
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "What does `<-ticker.C` do?",
+    "options": [
+      "Sends the current time to the ticker's channel",
+      "Receives (blocks until) the next tick value from the ticker's channel",
+      "Closes the ticker's channel",
+      "Pauses the ticker for one interval"
+    ],
+    "correctIndex": 1,
+    "explanation": "`<-ticker.C` is a channel receive. It blocks the current goroutine until `ticker.C` has a value to receive — which happens at each tick interval. This is Go's idiomatic way to implement a periodic loop without a `sleep`."
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "What happens to all goroutines when `main()` returns?",
+    "options": [
+      "They continue running in the background until they finish",
+      "They are killed immediately — the entire process terminates",
+      "They are suspended and resumed the next time the program runs",
+      "Go waits for all goroutines to finish before `main` can return"
+    ],
+    "correctIndex": 1,
+    "explanation": "When `main` returns, the Go runtime immediately exits the process, terminating all goroutines. There is no automatic 'wait for all goroutines' behavior. If you want to wait, you must use `sync.WaitGroup`, channels, or another synchronization mechanism. In the load balancer, `server.ListenAndServe()` blocks `main` indefinitely, so this isn't a concern."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "Why is an infinite `for { select { case <-t.C: ... } }` loop acceptable inside a goroutine?",
+    "options": [
+      "It is not acceptable — infinite loops in goroutines always cause memory leaks",
+      "Because the goroutine spends almost all its time blocked on `<-t.C`, consuming no CPU until the next tick",
+      "Because Go's garbage collector automatically cleans up idle goroutines",
+      "Because `select` exits automatically after a set number of iterations"
+    ],
+    "correctIndex": 1,
+    "explanation": "A goroutine blocked on a channel receive (`<-t.C`) is parked by the Go runtime — it consumes no CPU. It only wakes when the ticker fires. An infinite loop that spends 99.9% of its time blocked is perfectly fine; it's essentially just a callback registration."
+  },
+  {
+    "id": "q5",
+    "type": "multiple-choice",
+    "question": "Two goroutines call `b.SetAlive(true)` and `b.SetAlive(false)` concurrently while `GetNextPeer` calls `b.IsAlive()`. Is this safe?",
+    "options": [
+      "No — concurrent access to any struct field is always a data race",
+      "Yes — `SetAlive` uses `Lock()` and `IsAlive` uses `RLock()`, so they synchronize correctly via the `RWMutex`",
+      "Yes — Go automatically synchronizes struct field access",
+      "No — `RWMutex` only protects against multiple writers, not readers and writers simultaneously"
+    ],
+    "correctIndex": 1,
+    "explanation": "`SetAlive` acquires the write lock (`Lock()`), which blocks all readers and other writers. `IsAlive` acquires the read lock (`RLock()`), which blocks writers but not other readers. The `RWMutex` ensures that `Alive` is never read while it's being written — all concurrent access is safe."
+  }
+]

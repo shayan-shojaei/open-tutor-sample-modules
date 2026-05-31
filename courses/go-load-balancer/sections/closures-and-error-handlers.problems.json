@@ -1,0 +1,16 @@
+[
+  {
+    "id": "p1",
+    "statement": "Write a function `makeRetryHandler(maxRetries int, onExhausted func()) func()` that returns a closure. Each time the returned function is called, it increments an internal counter. When the counter reaches `maxRetries`, it calls `onExhausted` once and stops counting.\n\nTest it by creating a handler with `maxRetries=3` and an `onExhausted` that prints `\"giving up\"`. Call the returned function 5 times and verify the output.",
+    "hint": "The returned `func()` should close over an `attempts int` variable. Check `attempts >= maxRetries` before calling `onExhausted`.",
+    "solution": "```go\nfunc makeRetryHandler(maxRetries int, onExhausted func()) func() {\n    attempts := 0\n    return func() {\n        attempts++\n        fmt.Printf(\"attempt %d\\n\", attempts)\n        if attempts >= maxRetries {\n            onExhausted()\n        }\n    }\n}\n\nfunc main() {\n    handle := makeRetryHandler(3, func() { fmt.Println(\"giving up\") })\n    for i := 0; i < 5; i++ {\n        handle()\n    }\n}\n// Output:\n// attempt 1\n// attempt 2\n// attempt 3\n// giving up\n// attempt 4\n// giving up\n// attempt 5\n// giving up\n```",
+    "answer": "\"giving up\" prints on attempts 3, 4, and 5 (every call at or past maxRetries)"
+  },
+  {
+    "id": "p2",
+    "statement": "The classic closure-in-loop bug. Explain what this code prints and why, then fix it:\n\n```go\nfuncs := make([]func(), 3)\nfor i := 0; i < 3; i++ {\n    funcs[i] = func() { fmt.Println(i) }\n}\nfor _, f := range funcs {\n    f()\n}\n```",
+    "hint": "What is the value of `i` after the first loop completes? All three closures share the same `i` variable.",
+    "solution": "**What it prints:** `3 3 3`\n\n**Why:** All three closures capture the *same* `i` variable (not a copy of its value at the time the closure was created). The first loop runs to completion, leaving `i = 3`. When the closures are called in the second loop, all three read the same `i`, which is now `3`.\n\n**Fix:** Pass `i` as a function argument to create a new copy per iteration:\n\n```go\nfuncs := make([]func(), 3)\nfor i := 0; i < 3; i++ {\n    i := i  // create a new variable scoped to this iteration\n    funcs[i] = func() { fmt.Println(i) }\n}\n```\n\nOr use a parameter:\n\n```go\nfor i := 0; i < 3; i++ {\n    funcs[i] = func(n int) func() {\n        return func() { fmt.Println(n) }\n    }(i)\n}\n```",
+    "answer": "Prints `3 3 3` because all closures share the same `i`; fix by shadowing `i` with `i := i` inside the loop"
+  }
+]

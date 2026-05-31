@@ -1,0 +1,9 @@
+[
+  {
+    "id": "p1",
+    "statement": "Let $\\mathbf{u} = \\langle 3, 0, -4 \\rangle$.\n\n**(a)** Compute $|\\mathbf{u}|$.\n\n**(b)** Find the unit vector $\\hat{\\mathbf{u}}$.\n\n**(c)** Compute $2\\mathbf{u} - \\langle 1, 1, 1 \\rangle$.",
+    "hint": "For the magnitude, use $|\\mathbf{u}| = \\sqrt{u_1^2 + u_2^2 + u_3^2}$.",
+    "solution": "**Part (a):**\n$$|\\mathbf{u}| = \\sqrt{9 + 0 + 16} = \\sqrt{25} = 5$$\n\n**Part (b):**\n$$\\hat{\\mathbf{u}} = \\frac{1}{5}\\langle 3, 0, -4 \\rangle = \\left\\langle \\frac{3}{5}, 0, -\\frac{4}{5} \\right\\rangle$$\n\n**Part (c):**\n$$2\\mathbf{u} = \\langle 6, 0, -8 \\rangle$$\n$$2\\mathbf{u} - \\langle 1, 1, 1 \\rangle = \\langle 5, -1, -9 \\rangle$$",
+    "answer": "$|\\mathbf{u}| = 5$; $\\hat{\\mathbf{u}} = \\langle 3/5, 0, -4/5 \\rangle$; $2\\mathbf{u} - \\langle 1,1,1\\rangle = \\langle 5,-1,-9\\rangle$"
+  }
+]

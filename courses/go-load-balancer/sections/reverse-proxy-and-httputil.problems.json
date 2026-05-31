@@ -1,0 +1,16 @@
+[
+  {
+    "id": "p1",
+    "statement": "Update `NewBackend` so that the `ReverseProxy` it creates logs every request it forwards. Specifically, set a custom `Director` function on the proxy that:\n1. Calls the default director (use `httputil.NewSingleHostReverseProxy` and capture the original director)\n2. Logs the target URL using `log.Printf(\"Forwarding to: %s\", req.URL)`\n\nHint: `httputil.ReverseProxy` has a `Director func(*http.Request)` field you can set after creating the proxy.",
+    "hint": "Create the proxy with `httputil.NewSingleHostReverseProxy(u)`, save the original `proxy.Director`, then replace `proxy.Director` with a new function that calls the original and adds logging.",
+    "solution": "```go\nfunc NewBackend(rawURL string) (*Backend, error) {\n    u, err := url.Parse(rawURL)\n    if err != nil {\n        return nil, err\n    }\n    proxy := httputil.NewSingleHostReverseProxy(u)\n    originalDirector := proxy.Director\n    proxy.Director = func(req *http.Request) {\n        originalDirector(req)\n        log.Printf(\"Forwarding to: %s\", req.URL)\n    }\n    return &Backend{URL: u, Alive: true, ReverseProxy: proxy}, nil\n}\n```",
+    "answer": "Every forwarded request prints a log line with the target URL"
+  },
+  {
+    "id": "p2",
+    "statement": "The `lb` function currently always picks `serverPool.backends[0]`. Update it to pick backends in a simple sequential loop: on each call to `lb`, move to the next backend in the slice (wrap around when you reach the end).\n\nUse a package-level `var currentIndex int` counter. Do NOT use atomic operations yet — that comes later. Just make it functional for now.",
+    "hint": "After picking the backend at `currentIndex`, increment `currentIndex` and mod by `len(serverPool.backends)` to wrap around.",
+    "solution": "```go\nvar currentIndex int\n\nfunc lb(w http.ResponseWriter, r *http.Request) {\n    if len(serverPool.backends) == 0 {\n        http.Error(w, \"Service not available\", http.StatusServiceUnavailable)\n        return\n    }\n    peer := serverPool.backends[currentIndex]\n    currentIndex = (currentIndex + 1) % len(serverPool.backends)\n    peer.ReverseProxy.ServeHTTP(w, r)\n}\n```\n\nNote: this has a data race if multiple goroutines call `lb` simultaneously. The next section fixes this with `atomic.AddUint64`.",
+    "answer": "Requests cycle through backends 0, 1, 2, 0, 1, 2... (not thread-safe yet)"
+  }
+]

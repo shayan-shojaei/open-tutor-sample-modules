@@ -1,0 +1,63 @@
+{
+  "id": "calc3",
+  "title": "Calculus 3",
+  "description": "Multivariable calculus covering vectors, partial derivatives, multiple integrals, and vector calculus.",
+  "subject": "math",
+  "icon": "∫",
+  "language": "en",
+  "chapters": [
+    {
+      "id": "vectors-and-geometry",
+      "title": "Vectors and Geometry of Space",
+      "sections": [
+        {
+          "id": "vectors-intro",
+          "title": "Vectors in 3D Space",
+          "chapterId": "vectors-and-geometry"
+        },
+        {
+          "id": "dot-product",
+          "title": "The Dot Product",
+          "chapterId": "vectors-and-geometry"
+        },
+        {
+          "id": "cross-product",
+          "title": "The Cross Product",
+          "chapterId": "vectors-and-geometry"
+        }
+      ]
+    },
+    {
+      "id": "partial-derivatives",
+      "title": "Partial Derivatives",
+      "sections": [
+        {
+          "id": "partial-derivatives-basic",
+          "title": "Partial Derivatives",
+          "chapterId": "partial-derivatives"
+        },
+        {
+          "id": "gradient",
+          "title": "Gradient and Directional Derivatives",
+          "chapterId": "partial-derivatives"
+        }
+      ]
+    },
+    {
+      "id": "multiple-integrals",
+      "title": "Multiple Integrals",
+      "sections": [
+        {
+          "id": "double-integrals",
+          "title": "Double Integrals",
+          "chapterId": "multiple-integrals"
+        },
+        {
+          "id": "polar-integrals",
+          "title": "Double Integrals in Polar Coordinates",
+          "chapterId": "multiple-integrals"
+        }
+      ]
+    }
+  ]
+}

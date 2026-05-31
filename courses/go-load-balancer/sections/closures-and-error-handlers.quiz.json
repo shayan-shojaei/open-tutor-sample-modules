@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "A closure captures a variable `serverURL` from an outer function. After the outer function returns, what happens to `serverURL`?",
+    "options": [
+      "It is garbage collected since the outer function returned",
+      "It lives on the heap as long as the closure that references it is alive",
+      "It is copied into the closure at the time the closure is created",
+      "It becomes nil"
+    ],
+    "correctIndex": 1,
+    "explanation": "When a closure captures a variable, the Go compiler moves that variable to the heap so it outlives the stack frame of the outer function. The closure holds a reference to it, keeping it alive as long as the closure is reachable. This is called 'escaping to the heap.'"
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "In the `ErrorHandler` closure, `proxy.ServeHTTP(w, r.WithContext(ctx))` calls the proxy from within the proxy's own error handler. Why is this safe?",
+    "options": [
+      "It is not safe and will stack overflow on the first error",
+      "Because the retry counter in the context limits recursion to 3 levels before taking a different path",
+      "Because `proxy.ServeHTTP` is non-blocking and returns immediately",
+      "Because Go's goroutine stacks are automatically resized to handle any depth"
+    ],
+    "correctIndex": 1,
+    "explanation": "The closure checks `retries < 3` before retrying. After 3 retries, it takes the other branch (mark backend down, call `lb`). `lb` also has its own limit (`attempts > 3`). So the recursive depth is bounded — it can't spiral indefinitely."
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "What is the purpose of `select { case <-time.After(10 * time.Millisecond): ... }` in the error handler?",
+    "options": [
+      "To retry the request in a goroutine after 10ms without blocking the current goroutine",
+      "To wait 10ms before retrying, giving the backend a moment to recover from transient errors",
+      "To timeout the retry if the backend doesn't respond within 10ms",
+      "To rate-limit retries to a maximum of 100 per second"
+    ],
+    "correctIndex": 1,
+    "explanation": "`time.After(10ms)` returns a channel that fires after 10 milliseconds. The `select` blocks until that channel fires, creating a 10ms delay. This gives the backend a brief window to recover from temporary issues (like an overloaded socket queue) before the retry hits it again."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "The `ErrorHandler` closure references both `serverURL` and `proxy` — variables from the enclosing function. How does Go make this work?",
+    "options": [
+      "Go copies `serverURL` and `proxy` into the closure struct at creation time",
+      "Go allocates `serverURL` and `proxy` on the heap and the closure holds pointers to them",
+      "Go uses a global lookup table to resolve variable names at runtime",
+      "It only works for variables declared with `var`, not `:=`"
+    ],
+    "correctIndex": 1,
+    "explanation": "When the Go compiler detects that a variable is captured by a closure, it allocates that variable on the heap instead of the stack. The closure holds a pointer to the heap-allocated variable. This process is called 'escape analysis' and happens at compile time."
+  },
+  {
+    "id": "q5",
+    "type": "multiple-choice",
+    "question": "After 3 retries on the same backend fail, the error handler calls `lb(w, r.WithContext(ctx))` with an incremented `Attempts` count. What prevents this from retrying the same dead backend again?",
+    "options": [
+      "The dead backend is removed from `serverPool.backends`",
+      "`MarkBackendStatus` sets `Alive = false`, so `GetNextPeer` skips it via `IsAlive()`",
+      "`lb` adds the dead backend's URL to a global blocklist",
+      "The `Attempts` counter causes `lb` to pick a random backend"
+    ],
+    "correctIndex": 1,
+    "explanation": "`serverPool.MarkBackendStatus(serverURL, false)` calls `b.SetAlive(false)`. The next time `GetNextPeer` runs, it calls `b.IsAlive()` on each backend and skips the dead one. The combination of `MarkBackendStatus` + `IsAlive` check ensures dead backends are avoided without removing them from the pool (they can be marked alive again by the health checker)."
+  }
+]

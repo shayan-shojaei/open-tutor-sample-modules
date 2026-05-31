@@ -1,0 +1,9 @@
+[
+  {
+    "id": "p1",
+    "statement": "Let $\\mathbf{a} = \\langle 2, -3, 1 \\rangle$ and $\\mathbf{b} = \\langle 4, 1, -2 \\rangle$.\n\n**(a)** Compute $\\mathbf{a} \\cdot \\mathbf{b}$.\n\n**(b)** Are the vectors orthogonal? Explain.\n\n**(c)** Find $\\text{proj}_{\\mathbf{a}}\\mathbf{b}$.",
+    "hint": "For part (c), use $\\text{proj}_{\\mathbf{a}}\\mathbf{b} = \\dfrac{\\mathbf{a} \\cdot \\mathbf{b}}{|\\mathbf{a}|^2}\\,\\mathbf{a}$",
+    "solution": "**Part (a):**\n$$\\mathbf{a} \\cdot \\mathbf{b} = (2)(4) + (-3)(1) + (1)(-2) = 8 - 3 - 2 = 3$$\n\n**Part (b):**\nNo, the vectors are **not orthogonal** because $\\mathbf{a} \\cdot \\mathbf{b} = 3 \\neq 0$.\n\n**Part (c):**\nFirst, $|\\mathbf{a}|^2 = 4 + 9 + 1 = 14$.\n$$\\text{proj}_{\\mathbf{a}}\\mathbf{b} = \\frac{3}{14}\\langle 2, -3, 1 \\rangle = \\left\\langle \\frac{3}{7},\\, -\\frac{9}{14},\\, \\frac{3}{14} \\right\\rangle$$",
+    "answer": "$\\mathbf{a} \\cdot \\mathbf{b} = 3$; vectors are not orthogonal; $\\text{proj}_{\\mathbf{a}}\\mathbf{b} = \\left\\langle \\frac{3}{7}, -\\frac{9}{14}, \\frac{3}{14} \\right\\rangle$"
+  }
+]

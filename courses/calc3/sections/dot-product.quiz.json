@@ -1,0 +1,49 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "Which of the following is true when $\\mathbf{a} \\cdot \\mathbf{b} = 0$ for nonzero vectors $\\mathbf{a}$ and $\\mathbf{b}$?",
+    "options": [
+      "The vectors are parallel",
+      "The vectors are orthogonal",
+      "The vectors point in the same direction",
+      "The angle between them is $180°$"
+    ],
+    "correctIndex": 1,
+    "explanation": "A dot product of zero means $\\cos\\theta = 0$, which means $\\theta = 90°$. So the vectors are **orthogonal** (perpendicular)."
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "Compute $\\langle 1, -2, 3 \\rangle \\cdot \\langle 4, 0, -1 \\rangle$.",
+    "options": ["$1$", "$-1$", "$7$", "$-7$"],
+    "correctIndex": 0,
+    "explanation": "$(1)(4) + (-2)(0) + (3)(-1) = 4 + 0 - 3 = 1$"
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "If $\\mathbf{a} \\cdot \\mathbf{b} < 0$, what can you conclude about the angle $\\theta$ between the vectors?",
+    "options": [
+      "$\\theta < 90°$ (acute angle)",
+      "$\\theta = 90°$ (right angle)",
+      "$\\theta > 90°$ (obtuse angle)",
+      "Nothing — the sign of the dot product gives no angle information"
+    ],
+    "correctIndex": 2,
+    "explanation": "Since $\\mathbf{a} \\cdot \\mathbf{b} = |\\mathbf{a}||\\mathbf{b}|\\cos\\theta$ and $|\\mathbf{a}|,|\\mathbf{b}| > 0$, a negative dot product means $\\cos\\theta < 0$, which means $\\theta \\in (90°, 180°)$ — an obtuse angle."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "The vector projection of $\\mathbf{b}$ onto $\\mathbf{a}$ is given by which formula?",
+    "options": [
+      "$\\dfrac{\\mathbf{a} \\cdot \\mathbf{b}}{|\\mathbf{a}|}$",
+      "$\\dfrac{\\mathbf{a} \\cdot \\mathbf{b}}{|\\mathbf{b}|}\\,\\mathbf{b}$",
+      "$\\dfrac{\\mathbf{a} \\cdot \\mathbf{b}}{|\\mathbf{a}|^2}\\,\\mathbf{a}$",
+      "$\\dfrac{|\\mathbf{a}|}{\\mathbf{a} \\cdot \\mathbf{b}}\\,\\mathbf{a}$"
+    ],
+    "correctIndex": 2,
+    "explanation": "The vector projection is $\\text{proj}_{\\mathbf{a}}\\mathbf{b} = \\dfrac{\\mathbf{a} \\cdot \\mathbf{b}}{|\\mathbf{a}|^2}\\,\\mathbf{a}$. This gives the component of $\\mathbf{b}$ that lies along $\\mathbf{a}$ as an actual vector."
+  }
+]

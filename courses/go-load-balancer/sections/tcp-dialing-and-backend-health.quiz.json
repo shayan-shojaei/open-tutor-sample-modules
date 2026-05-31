@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "Why does `isBackendAlive` immediately close the TCP connection after it succeeds?",
+    "options": [
+      "Because TCP connections must be closed before they can be reused",
+      "To avoid leaking file descriptors — we only needed to verify reachability, not send data",
+      "Because `net.Conn` is not safe to keep open across goroutines",
+      "Because the connection would time out in 2 seconds anyway"
+    ],
+    "correctIndex": 1,
+    "explanation": "The goal of `isBackendAlive` is to check if the backend is accepting connections — nothing more. Keeping the connection open wastes a file descriptor on both ends. `defer conn.Close()` ensures it's closed as soon as the function returns, regardless of path."
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "What does `defer conn.Close()` guarantee?",
+    "options": [
+      "It closes `conn` before the function body executes",
+      "It closes `conn` when the surrounding function returns, even if a panic occurs",
+      "It closes `conn` after a 1-second delay",
+      "It closes `conn` only if no error was returned"
+    ],
+    "correctIndex": 1,
+    "explanation": "`defer` executes the deferred call when the surrounding function returns — whether via a normal return, an early return, or a panic. This makes it the safest place to put cleanup logic like closing connections, files, or releasing locks."
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "Why use `u.Host` (e.g. `localhost:8081`) rather than `u.String()` (e.g. `http://localhost:8081`) in `net.DialTimeout`?",
+    "options": [
+      "`net.DialTimeout` requires a full URL including the scheme",
+      "`net.DialTimeout` connects at the TCP level and only needs `host:port` — it doesn't understand URL schemes",
+      "`u.String()` is deprecated for use with `net` package functions",
+      "`u.Host` always includes the port; `u.String()` might not"
+    ],
+    "correctIndex": 1,
+    "explanation": "TCP connections are made to `host:port`. `net.DialTimeout` doesn't know what HTTP is — it opens a raw TCP socket. Passing the full URL including `http://` would cause a parse error. `u.Host` extracts just the `host:port` component that TCP needs."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "What is the advantage of a passive health check over only relying on active detection (detecting failures from live requests)?",
+    "options": [
+      "Passive checks are always faster than active detection",
+      "Passive checks discover dead backends during idle periods, so the first real request after downtime doesn't have to retry",
+      "Passive checks prevent the backend from crashing",
+      "Active detection requires modifying the backend's source code"
+    ],
+    "correctIndex": 1,
+    "explanation": "Active detection only works when requests are flowing. If backends go down while the load balancer is idle, those backends remain marked as alive. The next request would go to a dead backend, fail, trigger retries, and eventually fall over — adding latency. Passive checks update backend status continuously, even during idle periods."
+  },
+  {
+    "id": "q5",
+    "type": "multiple-choice",
+    "question": "In Go, how are errors represented and handled?",
+    "options": [
+      "Errors are thrown as exceptions and caught with `try/catch`",
+      "Errors are plain values of type `error` (an interface), returned as the last return value and checked with `if err != nil`",
+      "Errors cause the program to panic automatically",
+      "Errors are stored in a global `lastError` variable"
+    ],
+    "correctIndex": 1,
+    "explanation": "Go has no exceptions. Functions return errors as regular values — typically the last return value of type `error`. The caller checks `if err != nil` and handles it explicitly. This makes error handling visible in the code and prevents silent failures."
+  }
+]

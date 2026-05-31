@@ -1,0 +1,16 @@
+[
+  {
+    "id": "p1",
+    "statement": "Add a method `BackendCount() int` to `ServerPool` that returns the number of backends currently in the pool. Then add a second method `GetBackend(index int) *Backend` that returns the backend at a given index (assume the index is always valid).\n\nWrite a `main()` that builds a pool with three backends and uses both methods to print each backend's host.",
+    "hint": "`len(s.backends)` gives you the count. Index into the slice with `s.backends[index]`.",
+    "solution": "```go\nfunc (s *ServerPool) BackendCount() int {\n    return len(s.backends)\n}\n\nfunc (s *ServerPool) GetBackend(index int) *Backend {\n    return s.backends[index]\n}\n\nfunc main() {\n    pool := &ServerPool{}\n    for _, u := range []string{\"http://localhost:8081\", \"http://localhost:8082\", \"http://localhost:8083\"} {\n        b, _ := NewBackend(u)\n        pool.AddBackend(b)\n    }\n    for i := 0; i < pool.BackendCount(); i++ {\n        fmt.Println(pool.GetBackend(i).URL.Host)\n    }\n}\n```",
+    "answer": "localhost:8081, localhost:8082, localhost:8083 (each on a line)"
+  },
+  {
+    "id": "p2",
+    "statement": "The code below has a subtle bug: `AddBackend` doesn't modify the original pool. Identify the bug and fix it.\n\n```go\ntype ServerPool struct {\n    backends []*Backend\n    current  uint64\n}\n\nfunc (s ServerPool) AddBackend(b *Backend) {\n    s.backends = append(s.backends, b)\n}\n\nfunc main() {\n    pool := ServerPool{}\n    b, _ := NewBackend(\"http://localhost:8080\")\n    pool.AddBackend(b)\n    fmt.Println(len(pool.backends)) // prints 0, not 1\n}\n```",
+    "hint": "Look at the receiver type of `AddBackend`. What kind of receiver is it?",
+    "solution": "`AddBackend` uses a **value receiver** `(s ServerPool)`. When called, Go copies the entire `ServerPool` struct — including the `backends` slice header — into `s`. The `append` inside the method updates the copy's slice, not the original. When the method returns, the copy is discarded.\n\nFix: use a pointer receiver:\n\n```go\nfunc (s *ServerPool) AddBackend(b *Backend) {\n    s.backends = append(s.backends, b)\n}\n```\n\nAlso note that `pool` in `main` must be a pointer when calling a pointer receiver method via `pool.AddBackend(b)` — Go handles this automatically when `pool` is addressable (a local variable is).",
+    "answer": "Change `(s ServerPool)` to `(s *ServerPool)`"
+  }
+]

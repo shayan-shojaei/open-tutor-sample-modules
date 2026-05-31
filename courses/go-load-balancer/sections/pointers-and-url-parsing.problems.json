@@ -1,0 +1,16 @@
+[
+  {
+    "id": "p1",
+    "statement": "Using the `NewBackend` constructor from this section, write a program that:\n1. Creates three backends from these URLs: `http://localhost:8081`, `http://localhost:8082`, `http://localhost:8083`\n2. Handles any parse errors with `log.Fatal`\n3. Prints the `Host` and `Scheme` of each backend\n\nExpected output:\n```\n8081: host=localhost:8081 scheme=http\n8082: host=localhost:8082 scheme=http\n8083: host=localhost:8083 scheme=http\n```",
+    "hint": "Call `NewBackend` for each URL and check the error. Access `b.URL.Host` and `b.URL.Scheme`.",
+    "solution": "```go\npackage main\n\nimport (\n    \"fmt\"\n    \"log\"\n    \"net/url\"\n)\n\ntype Backend struct {\n    URL   *url.URL\n    Alive bool\n}\n\nfunc NewBackend(rawURL string) (*Backend, error) {\n    u, err := url.Parse(rawURL)\n    if err != nil {\n        return nil, err\n    }\n    return &Backend{URL: u, Alive: true}, nil\n}\n\nfunc main() {\n    urls := []string{\n        \"http://localhost:8081\",\n        \"http://localhost:8082\",\n        \"http://localhost:8083\",\n    }\n    for _, rawURL := range urls {\n        b, err := NewBackend(rawURL)\n        if err != nil {\n            log.Fatal(err)\n        }\n        port := b.URL.Port()\n        fmt.Printf(\"%s: host=%s scheme=%s\\n\", port, b.URL.Host, b.URL.Scheme)\n    }\n}\n```",
+    "answer": "Three lines showing host and scheme for each backend"
+  },
+  {
+    "id": "p2",
+    "statement": "The following code has a bug. Identify it and fix it:\n\n```go\nfunc printHost(b *Backend) {\n    fmt.Println(b.URL.Host)\n}\n\nfunc main() {\n    var b *Backend\n    printHost(b)\n}\n```",
+    "hint": "What is the value of `b`? What happens when you access a field through a nil pointer?",
+    "solution": "`b` is a nil pointer (`var b *Backend` gives the zero value, which is `nil`). Calling `printHost(b)` passes a nil `*Backend`. Inside `printHost`, accessing `b.URL` dereferences the nil pointer, causing a panic.\n\nFix: initialize `b` before passing it:\n\n```go\nfunc main() {\n    b, err := NewBackend(\"http://localhost:8080\")\n    if err != nil {\n        log.Fatal(err)\n    }\n    printHost(b)\n}\n```\n\nOr add a nil guard inside `printHost`:\n\n```go\nfunc printHost(b *Backend) {\n    if b == nil {\n        fmt.Println(\"no backend\")\n        return\n    }\n    fmt.Println(b.URL.Host)\n}\n```",
+    "answer": "`b` is nil; dereferencing it panics. Initialize `b` with `NewBackend` or add a nil check."
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "p1",
+    "statement": "Write a function `startHealthChecker(pool *ServerPool, interval time.Duration)` that starts a background goroutine which calls `pool.HealthCheck()` every `interval` duration. It should log \"Health check starting\" before each check and \"Health check done\" after.\n\nThen modify `main()` to call it with a 5-second interval (so you can see it fire quickly while testing), and add `select {}` at the end of `main()` to keep the program running.\n\nNote: `select {}` with no cases blocks forever — it's the idiomatic way to keep `main` alive when all real work is done in goroutines.",
+    "hint": "Use `time.NewTicker(interval)` inside the goroutine. Start the goroutine with `go func() { ... }()`.",
+    "solution": "```go\nfunc startHealthChecker(pool *ServerPool, interval time.Duration) {\n    go func() {\n        t := time.NewTicker(interval)\n        for {\n            select {\n            case <-t.C:\n                log.Println(\"Health check starting\")\n                pool.HealthCheck()\n                log.Println(\"Health check done\")\n            }\n        }\n    }()\n}\n\nfunc main() {\n    pool := &ServerPool{}\n    // ... add backends ...\n\n    startHealthChecker(pool, 5*time.Second)\n\n    server := http.Server{\n        Addr:    \":8000\",\n        Handler: http.HandlerFunc(lb),\n    }\n    log.Fatal(server.ListenAndServe())\n    // ListenAndServe blocks, so select {} is not needed here\n}\n```",
+    "answer": "A background goroutine logs and calls HealthCheck every 5 seconds"
+  },
+  {
+    "id": "p2",
+    "statement": "The following goroutine has a bug: it might not print anything before `main` returns. Explain why, and provide two different fixes.\n\n```go\nfunc main() {\n    go func() {\n        time.Sleep(100 * time.Millisecond)\n        fmt.Println(\"goroutine done\")\n    }()\n    fmt.Println(\"main done\")\n}\n```",
+    "hint": "When does `main` return? What happens to goroutines when `main` returns?",
+    "solution": "**Why:** When `main` returns, the Go runtime terminates the process immediately, killing all running goroutines. The goroutine sleeps 100ms, but `main` returns almost instantly after printing \"main done\" — before the goroutine wakes up.\n\n**Fix 1: Use `sync.WaitGroup`**\n```go\nfunc main() {\n    var wg sync.WaitGroup\n    wg.Add(1)\n    go func() {\n        defer wg.Done()\n        time.Sleep(100 * time.Millisecond)\n        fmt.Println(\"goroutine done\")\n    }()\n    fmt.Println(\"main done\")\n    wg.Wait() // block until wg counter reaches 0\n}\n```\n\n**Fix 2: Use a channel**\n```go\nfunc main() {\n    done := make(chan struct{})\n    go func() {\n        time.Sleep(100 * time.Millisecond)\n        fmt.Println(\"goroutine done\")\n        close(done)\n    }()\n    fmt.Println(\"main done\")\n    <-done // block until goroutine closes the channel\n}\n```",
+    "answer": "`main` exits before the goroutine wakes up; use `sync.WaitGroup` or a done channel"
+  }
+]

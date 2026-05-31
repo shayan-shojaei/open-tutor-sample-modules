@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "What does `httputil.NewSingleHostReverseProxy(u)` return?",
+    "options": [
+      "A new `http.Server` configured to forward requests to `u`",
+      "An `*httputil.ReverseProxy` that implements `http.Handler` and forwards requests to `u`",
+      "A function of type `http.HandlerFunc`",
+      "A TCP connection to the backend at `u`"
+    ],
+    "correctIndex": 1,
+    "explanation": "`httputil.NewSingleHostReverseProxy` returns an `*httputil.ReverseProxy`. Because `ReverseProxy` has a `ServeHTTP` method, it implements `http.Handler` and can be used anywhere an `http.Handler` is expected."
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "In the load balancer, why is `ReverseProxy` stored as a field on `Backend` instead of created fresh on every request?",
+    "options": [
+      "Because `httputil.NewSingleHostReverseProxy` is not goroutine-safe and can only be called once",
+      "To avoid the cost of allocating and initializing the proxy on every single incoming request",
+      "Because `ReverseProxy` maintains a persistent TCP connection that would be lost if recreated",
+      "It makes no difference — it's just a style preference"
+    ],
+    "correctIndex": 1,
+    "explanation": "Creating the proxy once at startup and reusing it is more efficient. The proxy also maintains internal state (like transport connections) that is worth keeping alive. Creating a new proxy per request would throw away that state and add unnecessary allocation."
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "How does `ReverseProxy.ServeHTTP(w, r)` return the backend's response to the client?",
+    "options": [
+      "It returns the response as a `*http.Response` value that you then write manually",
+      "It writes the backend's response headers and body directly to `w` (the client's `ResponseWriter`)",
+      "It redirects the client to the backend URL with a 302 response",
+      "It stores the response in a cache and the client polls for it"
+    ],
+    "correctIndex": 1,
+    "explanation": "`ReverseProxy.ServeHTTP` forwards the request to the backend, receives the full response, and writes it (status code, headers, body) directly to `w`. The client receives the backend's response transparently."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "What package provides `ReverseProxy` in the Go standard library?",
+    "options": [
+      "`net/http`",
+      "`net/http/httputil`",
+      "`net/proxy`",
+      "`http/reverse`"
+    ],
+    "correctIndex": 1,
+    "explanation": "`httputil.ReverseProxy` lives in `net/http/httputil`. The `net/http` package contains the core HTTP types (`Server`, `Request`, `ResponseWriter`, etc.), while `net/http/httputil` provides utilities built on top of those types."
+  },
+  {
+    "id": "q5",
+    "type": "multiple-choice",
+    "question": "The `lb` function calls `peer.ReverseProxy.ServeHTTP(w, r)`. If the backend is down and the connection fails, what happens by default?",
+    "options": [
+      "The proxy panics",
+      "The proxy writes a 502 Bad Gateway error to `w` and returns",
+      "The proxy retries the request automatically up to 3 times",
+      "The proxy silently closes the connection with no response"
+    ],
+    "correctIndex": 1,
+    "explanation": "By default, if the backend connection fails, `ReverseProxy` calls its `ErrorHandler` (or the default handler if none is set), which writes a 502 Bad Gateway response. We'll replace this default behavior in Chapter 3 with a custom `ErrorHandler` that retries and marks the backend as down."
+  }
+]

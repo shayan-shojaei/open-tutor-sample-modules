@@ -1,0 +1,16 @@
+[
+  {
+    "id": "p1",
+    "statement": "Write a function `WithAttempt(r *http.Request, attempt int) *http.Request` that returns a copy of the request with `Attempts` set to `attempt` in its context.\n\nThen write a test in `main()` that:\n1. Creates a fake request with `http.NewRequest`\n2. Calls `WithAttempt` to set attempts to 2\n3. Verifies `GetAttemptsFromContext` returns 2\n4. Calls `WithAttempt` again to set attempts to 3 on the result\n5. Verifies the final attempt count is 3",
+    "hint": "Use `r.WithContext(context.WithValue(r.Context(), Attempts, attempt))`. Each call creates a new context wrapping the previous one.",
+    "solution": "```go\nfunc WithAttempt(r *http.Request, attempt int) *http.Request {\n    ctx := context.WithValue(r.Context(), Attempts, attempt)\n    return r.WithContext(ctx)\n}\n\nfunc main() {\n    r, _ := http.NewRequest(\"GET\", \"http://localhost/\", nil)\n\n    r2 := WithAttempt(r, 2)\n    fmt.Println(GetAttemptsFromContext(r2)) // 2\n    fmt.Println(GetAttemptsFromContext(r))  // 0 — original unchanged\n\n    r3 := WithAttempt(r2, 3)\n    fmt.Println(GetAttemptsFromContext(r3)) // 3\n    fmt.Println(GetAttemptsFromContext(r2)) // 2 — r2 unchanged\n}\n```",
+    "answer": "Prints 2, 0, 3, 2 — each `WithContext` creates a new immutable context"
+  },
+  {
+    "id": "p2",
+    "statement": "Explain why using a plain string as a context key (e.g., `context.WithValue(ctx, \"attempts\", 5)`) is risky in a package that other packages might import, and show how to fix it using the `contextKey` pattern from this section.",
+    "hint": "What happens if two packages both use `context.WithValue(ctx, \"user\", ...)` and one reads the other's value?",
+    "solution": "If two packages both use the string `\"attempts\"` as a context key, a function from one package could accidentally read a value set by the other. Since `context.Value` matches keys by equality, any `\"attempts\"` key matches — there's no namespace.\n\nThe fix is to define a package-private type:\n\n```go\n// In your package:\ntype contextKey int\n\nconst (\n    Attempts contextKey = iota\n    Retry\n)\n```\n\nNow `contextKey(0)` and `int(0)` are different types in Go's type system. Even if another package uses `context.WithValue(ctx, 0, ...)` with a plain `int`, it will never match your `Attempts` key because the types differ. Context key lookup uses both value AND type equality.",
+    "answer": "String keys can collide across packages; a private named type (`type contextKey int`) prevents collisions because type identity is part of the key comparison"
+  }
+]

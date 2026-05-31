@@ -1,0 +1,16 @@
+[
+  {
+    "id": "p1",
+    "statement": "Add a method `MarkBackendStatus(backendURL *url.URL, alive bool)` to `ServerPool` that finds the backend with the matching URL and sets its `Alive` field.\n\nThen test it: build a pool with 3 backends, mark the second one as down, and verify that `GetNextPeer()` skips it over 6 consecutive calls (print the host of each returned backend).",
+    "hint": "Iterate `s.backends` and compare `b.URL.String() == backendURL.String()` to find the matching backend. For now, directly set `b.Alive = alive` (we'll add mutex protection in the next section).",
+    "solution": "```go\nfunc (s *ServerPool) MarkBackendStatus(backendURL *url.URL, alive bool) {\n    for _, b := range s.backends {\n        if b.URL.String() == backendURL.String() {\n            b.Alive = alive\n            return\n        }\n    }\n}\n\nfunc main() {\n    pool := &ServerPool{}\n    urls := []string{\"http://localhost:8081\", \"http://localhost:8082\", \"http://localhost:8083\"}\n    for _, u := range urls {\n        b, _ := NewBackend(u)\n        pool.AddBackend(b)\n    }\n\n    downURL, _ := url.Parse(\"http://localhost:8082\")\n    pool.MarkBackendStatus(downURL, false)\n\n    for i := 0; i < 6; i++ {\n        peer := pool.GetNextPeer()\n        if peer != nil {\n            fmt.Println(peer.URL.Host)\n        }\n    }\n    // Expected: only 8081 and 8083 appear\n}\n```",
+    "answer": "Only localhost:8081 and localhost:8083 appear; localhost:8082 is skipped"
+  },
+  {
+    "id": "p2",
+    "statement": "Explain why the following `NextIndex` implementation has a data race, and rewrite it to be race-free using `sync/atomic`:\n\n```go\nfunc (s *ServerPool) NextIndex() int {\n    s.current++\n    return int(s.current % uint64(len(s.backends)))\n}\n```",
+    "hint": "Two goroutines can interleave between the read and write of `s.current`. What does `atomic.AddUint64` guarantee that `s.current++` does not?",
+    "solution": "`s.current++` is not atomic. It compiles to three operations: load `s.current`, add 1, store the result. Two goroutines can interleave these steps, causing one increment to be lost. Go's race detector will flag this.\n\n`atomic.AddUint64` performs the read-modify-write as a single uninterruptible CPU instruction, so no goroutine can observe an intermediate state.\n\nRace-free version:\n\n```go\nfunc (s *ServerPool) NextIndex() int {\n    return int(atomic.AddUint64(&s.current, 1) % uint64(len(s.backends)))\n}\n```",
+    "answer": "`s.current++` is a non-atomic read-modify-write; use `atomic.AddUint64(&s.current, 1)`"
+  }
+]
